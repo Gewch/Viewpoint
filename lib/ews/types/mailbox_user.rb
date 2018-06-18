@@ -45,6 +45,10 @@ module Viewpoint::EWS::Types
       resp = @ews.get_user_oof_settings(mailbox)
       ewsi = resp.response.clone
       ewsi.delete(:response_message)
+      if ewsi.empty?
+        raise "An error has occurred: EWSI is empty. \n
+        Error is: #{resp.response}"
+      end
       return OutOfOffice.new(self,ewsi)
       s = resp[:oof_settings]
       @oof_state = s[:oof_state][:text]
@@ -54,6 +58,9 @@ module Viewpoint::EWS::Types
       @oof_internal_reply = s[:internal_reply][:message][:text]
       @oof_external_reply = s[:internal_reply][:message][:text]
       true
+    rescue => e
+      puts e.message
+      puts e.backtrace
     end
 
     # Get information about when the user with the given email address is available.

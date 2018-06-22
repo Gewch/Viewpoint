@@ -61,6 +61,15 @@ module Viewpoint::EWS::MailboxAccessors
     get_user_availability_parser(resp)
   end
 
+  def get_user_mailtips(service_address, emails)
+    opts = {
+        host_email: service_address,
+        recip_emails: emails
+    }
+    resp = ews.get_user_mailtips opts
+    get_user_mailtips_parser(resp)
+  end
+
 
 private
 
@@ -87,6 +96,12 @@ private
     else
       raise EwsError, "GetUserAvailability produced an error: #{resp.code}: #{resp.message}"
     end
+  end
+
+  def get_user_mailtips_parser(resp)
+    resp = resp.clone
+    response_messages = resp.body[0][:get_mail_tips_response][:elems][1][:response_messages]
+    response_messages[:elems]
   end
 
 end # Viewpoint::EWS::MailboxAccessors

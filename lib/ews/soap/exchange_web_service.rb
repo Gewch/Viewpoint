@@ -168,6 +168,34 @@ module Viewpoint::EWS::SOAP
       do_soap_request(req, response_class: EwsSoapFreeBusyResponse)
     end
 
+    def get_user_mailtips(opts)
+      opts = opts.clone
+      req = build_soap! do |type, builder|
+        if(type == :header)
+        else
+          builder.nbuild.GetMailTips {|x|
+            x.parent.default_namespace = @default_ns
+            builder.nbuild.SendingAs { |xml|
+              xml['t'].EmailAddress opts[:host_email]
+              xml['t'].RoutingType 'SMTP'
+            }
+
+            builder.nbuild.Recipients { |xml|
+              opts[:recip_emails].each do |email|
+                xml['t'].Mailbox {
+                  xml['t'].EmailAddress email
+                  xml['t'].RoutingType 'SMTP'
+                }
+              end
+            }
+            x.MailTipsRequested 'All'
+          }
+        end
+      end
+
+      do_soap_request(req, response_class: EwsSoapResponse)
+    end
+
     # Gets the rooms that are in the specified room distribution list
     # @see http://msdn.microsoft.com/en-us/library/aa563465.aspx
     # @param [string] roomDistributionList
